@@ -1,0 +1,1 @@
+printf("Projected: %f %f %f\n", v.x, v.y, v.z);
