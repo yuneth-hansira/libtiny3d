@@ -148,3 +148,45 @@ void create_test_pgm(const char *filename, vec3 *points, int point_count, int wi
 
     free(data);
 }
+
+// Helper: draw a line on a pixel buffer (Bresenham's algorithm)
+static void draw_line(unsigned char *data, int width, int height, int x0, int y0, int x1, int y1) {
+    int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    int err = dx + dy, e2;
+    while (1) {
+        if (x0 >= 0 && x0 < width && y0 >= 0 && y0 < height)
+            data[y0 * width + x0] = 255;
+        if (x0 == x1 && y0 == y1) break;
+        e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x0 += sx; }
+        if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+}
+
+// Draw wireframe cube as PGM
+void draw_wireframe_pgm(const char *filename, vec3 *points, int point_count, const int edges[][2], int edge_count, int width, int height) {
+    unsigned char *data = (unsigned char*)calloc(width * height, 1);
+    if (!data) return;
+
+    // Project points to 2D image coordinates
+    int px[point_count], py[point_count];
+    for (int i = 0; i < point_count; i++) {
+        px[i] = (int)((points[i].x + 1.0f) * 0.5f * (width - 1));
+        py[i] = (int)((points[i].y + 1.0f) * 0.5f * (height - 1));
+    }
+
+    // Draw edges
+    for (int i = 0; i < edge_count; i++) {
+        int a = edges[i][0], b = edges[i][1];
+        draw_line(data, width, height, px[a], py[a], px[b], py[b]);
+    }
+
+    FILE *f = fopen(filename, "wb");
+    if (f) {
+        fprintf(f, "P5\n%d %d\n255\n", width, height);
+        fwrite(data, 1, width * height, f);
+        fclose(f);
+    }
+    free(data);
+}

@@ -29,5 +29,6 @@ vec3 mat4_mul_vec3(mat4 m, vec3 v);
 
 // --- visualization ---
 void create_test_pgm(const char *filename, vec3 *points, int point_count, int width, int height);
+void draw_wireframe_pgm(const char *filename, vec3 *points, int point_count, const int edges[][2], int edge_count, int width, int height);
 
 #endif // MATH3D_H
